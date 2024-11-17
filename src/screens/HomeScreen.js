@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
     View, 
     SafeAreaView, 
@@ -6,7 +6,9 @@ import {
     Platform,
     StatusBar,
     Alert,
-    Keyboard 
+    Keyboard,
+    ScrollView,
+    RefreshControl
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
@@ -23,6 +25,7 @@ export default function HomeScreen() {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState('all');
     const isFocused = useIsFocused();
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         if (isFocused) {
@@ -79,6 +82,12 @@ export default function HomeScreen() {
         return habit.type === filterType;
     });
 
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await loadHabits();
+        setRefreshing(false);
+    }, []);
+
     return (
         <SafeAreaView style={[styles.container, { 
             backgroundColor: isDarkMode ? '#000' : '#fff' 
@@ -101,7 +110,18 @@ export default function HomeScreen() {
                 onSubmit={addHabit}
             />
 
-            <View style={styles.habitList}>
+            <ScrollView 
+                style={styles.scrollView}
+                contentContainerStyle={styles.habitList}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={isDarkMode ? '#fff' : '#000'}
+                    />
+                }
+            >
                 {filteredHabits.map(habit => (
                     <HabitCard
                         key={habit.id}
@@ -110,7 +130,7 @@ export default function HomeScreen() {
                         onIncrement={incrementHabitCount}
                     />
                 ))}
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -121,8 +141,11 @@ const styles = StyleSheet.create({
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
         backgroundColor: '#f5f5f5',
     },
-    habitList: {
+    scrollView: {
         flex: 1,
+    },
+    habitList: {
         padding: 16,
+        paddingTop: 8,
     }
 });
