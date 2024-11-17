@@ -4,14 +4,17 @@ import TabNavigator from './src/navigation/TabNavigator';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { 
+  Inter_400Regular,
+  Inter_700Bold 
+} from '@expo-google-fonts/inter';
 
-// Mantener visible la pantalla de splash hasta que se carguen las fuentes
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
     const [fontsLoaded] = useFonts({
-        'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
-        'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
+        'Inter-Regular': Inter_400Regular,
+        'Inter-Bold': Inter_700Bold,
     });
 
     const onLayoutRootView = useCallback(async () => {

@@ -81,3 +81,27 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    content: {
+        flex: 1,
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 4,
+    },
+    count: {
+        fontSize: 14,
+        color: '#666',
+    },
+    incrementButton: {
+        padding: 8,
+    }
+});
