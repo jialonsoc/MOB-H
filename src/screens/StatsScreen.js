@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Platform, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Platform, Dimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@react-navigation/native';
 import { useThemeContext } from '../context/ThemeContext';
@@ -13,6 +13,12 @@ export default function StatsScreen() {
   const { isDarkMode } = useThemeContext();
   const [habits, setHabits] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [animatedData, setAnimatedData] = useState({
+    labels: [],
+    datasets: [{ data: [] }]
+  });
+  
+  const animationValue = new Animated.Value(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -20,8 +26,24 @@ export default function StatsScreen() {
         try {
           const savedHabits = await AsyncStorage.getItem('habits');
           if (savedHabits) {
-            setHabits(JSON.parse(savedHabits));
-            setRefreshKey(prev => prev + 1);
+            const parsedHabits = JSON.parse(savedHabits);
+            setHabits(parsedHabits);
+            
+            Animated.spring(animationValue, {
+              toValue: 1,
+              useNativeDriver: true,
+              tension: 40,
+              friction: 8
+            }).start();
+
+            setAnimatedData({
+              labels: parsedHabits.map(habit => 
+                habit.name.substring(0, 10) + (habit.name.length > 10 ? '...' : '')
+              ),
+              datasets: [{
+                data: parsedHabits.map(habit => habit.count || 0)
+              }]
+            });
           }
         } catch (error) {
           console.error('Error loading habits:', error);
@@ -29,9 +51,7 @@ export default function StatsScreen() {
       };
 
       loadHabits();
-
       const intervalId = setInterval(loadHabits, 1000);
-
       return () => clearInterval(intervalId);
     }, [])
   );

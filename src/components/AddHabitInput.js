@@ -1,18 +1,34 @@
-import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { HABIT_TYPES } from '../utils/constants';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function AddHabitInput({ value, onChangeText, onSubmit }) {
     const [showModal, setShowModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [habitName, setHabitName] = useState('');
+    const [image, setImage] = useState(null);
+
+    const pickImage = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setImage(result.assets[0].uri);
+        }
+    };
 
     const handleSubmit = () => {
         if (habitName.trim() && selectedCategory) {
-            onSubmit(habitName, selectedCategory);
+            onSubmit(habitName, selectedCategory, image);
             setHabitName('');
             setSelectedCategory('');
+            setImage(null);
             setShowModal(false);
         }
     };
@@ -42,7 +58,28 @@ export default function AddHabitInput({ value, onChangeText, onSubmit }) {
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Selecciona una categoría</Text>
+                        <Text style={styles.modalTitle}>Nuevo Hábito</Text>
+
+                        <TouchableOpacity 
+                            style={styles.imageContainer}
+                            onPress={pickImage}
+                        >
+                            {image ? (
+                                <Image 
+                                    source={{ uri: image }} 
+                                    style={styles.habitImage} 
+                                />
+                            ) : (
+                                <View style={styles.placeholderContainer}>
+                                    <Ionicons name="camera" size={40} color="#666" />
+                                    <Text style={styles.placeholderText}>
+                                        Añadir foto (opcional)
+                                    </Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+
+                        <Text style={styles.sectionTitle}>Selecciona una categoría</Text>
                         
                         {HABIT_TYPES.filter(type => type.id !== 'all').map((type) => (
                             <TouchableOpacity
@@ -67,7 +104,10 @@ export default function AddHabitInput({ value, onChangeText, onSubmit }) {
 
                         <TouchableOpacity 
                             style={styles.cancelButton}
-                            onPress={() => setShowModal(false)}
+                            onPress={() => {
+                                setShowModal(false);
+                                setImage(null);
+                            }}
                         >
                             <Text style={styles.cancelText}>Cancelar</Text>
                         </TouchableOpacity>
@@ -154,5 +194,34 @@ const styles = StyleSheet.create({
     cancelText: {
         color: '#ff4444',
         fontSize: 16,
+    },
+    imageContainer: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        backgroundColor: '#f0f0f0',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+        overflow: 'hidden',
+    },
+    habitImage: {
+        width: '100%',
+        height: '100%',
+    },
+    placeholderContainer: {
+        alignItems: 'center',
+    },
+    placeholderText: {
+        color: '#666',
+        marginTop: 8,
+        fontSize: 12,
+        textAlign: 'center',
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        alignSelf: 'flex-start',
     }
 });

@@ -70,18 +70,32 @@ export default function HabitCard({ habit, onDelete, onIncrement }) {
                 ]}
             >
                 <View style={[styles.card, {
-                    backgroundColor: isDarkMode ? '#1c1c1e' : '#fff',
-                }]}>
-                    <View style={styles.content}>
-                        <Text style={[styles.title, { 
-                            color: isDarkMode ? '#fff' : '#000' 
-                        }]}>{habit.name}</Text>
-                        <Text style={[styles.count, { 
-                            color: isDarkMode ? '#999' : '#666' 
-                        }]}>
-                            Realizado: {count} veces
-                        </Text>
-                    </View>
+    backgroundColor: isDarkMode ? '#1c1c1e' : '#fff',
+}]}>
+    {habit.image ? (
+        <Image 
+            source={{ uri: habit.image }} 
+            style={styles.habitImage} 
+        />
+    ) : (
+        <View style={styles.noImageContainer}>
+            <Text style={[styles.noImageText, { 
+                color: isDarkMode ? '#666' : '#999' 
+            }]}>
+                X
+            </Text>
+        </View>
+    )}
+    <View style={styles.content}>
+        <Text style={[styles.title, { 
+            color: isDarkMode ? '#fff' : '#000' 
+        }]}>{habit.name}</Text>
+        <Text style={[styles.count, { 
+            color: isDarkMode ? '#999' : '#666' 
+        }]}>
+            Realizado: {count} veces
+        </Text>
+    </View>
                     <View style={styles.buttonsContainer}>
                         <TouchableOpacity 
                             style={styles.button}
@@ -147,5 +161,24 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginHorizontal: 10,
+    },
+    habitImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginRight: 15,
+    },
+    noImageContainer: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: '#f0f0f0',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
+    },
+    noImageText: {
+        fontSize: 24,
+        fontWeight: 'bold',
     }
 });
