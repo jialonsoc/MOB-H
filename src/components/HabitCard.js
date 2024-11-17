@@ -14,6 +14,22 @@ export default function HabitCard({ habit, onDelete, onIncrement }) {
     const { isDarkMode } = useThemeContext();
     const translateX = new Animated.Value(0);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [count, setCount] = useState(habit.count || 0);
+
+    const handleIncrease = () => {
+        setCount((prevCount) => prevCount + 1);
+        onIncrement(habit.id);
+    };
+
+    const handleDecrease = () => {
+        setCount((prevCount) => {
+            if (prevCount > 0) {
+                // Aquí deberías agregar una función onDecrement similar a onIncrement
+                return prevCount - 1;
+            }
+            return prevCount;
+        });
+    };
 
     const onGestureEvent = Animated.event(
         [{ nativeEvent: { translationX: translateX } }],
@@ -63,15 +79,26 @@ export default function HabitCard({ habit, onDelete, onIncrement }) {
                         <Text style={[styles.count, { 
                             color: isDarkMode ? '#999' : '#666' 
                         }]}>
-                            Realizado: {habit.count || 0} veces
+                            Realizado: {count} veces
                         </Text>
                     </View>
-                    <TouchableOpacity 
-                        style={styles.incrementButton}
-                        onPress={() => onIncrement(habit.id)}
-                    >
-                        <Ionicons name="add-circle" size={24} color="#007AFF" />
-                    </TouchableOpacity>
+                    <View style={styles.buttonsContainer}>
+                        <TouchableOpacity 
+                            style={styles.button}
+                            onPress={handleDecrease}
+                        >
+                            <Ionicons name="remove-circle" size={24} color="#ff4444" />
+                        </TouchableOpacity>
+                        <Text style={[styles.counterText, {
+                            color: isDarkMode ? '#fff' : '#000'
+                        }]}>{count}</Text>
+                        <TouchableOpacity 
+                            style={styles.button}
+                            onPress={handleIncrease}
+                        >
+                            <Ionicons name="add-circle" size={24} color="#007AFF" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </Animated.View>
         </PanGestureHandler>
@@ -109,7 +136,16 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#666',
     },
-    incrementButton: {
+    buttonsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    button: {
         padding: 8,
+    },
+    counterText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginHorizontal: 10,
     }
 });
