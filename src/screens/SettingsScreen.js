@@ -3,31 +3,38 @@ import { StyleSheet, Text, View, TouchableOpacity, Switch, Platform } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@react-navigation/native';
 import { useState } from 'react';
+import { useThemeContext } from '../context/ThemeContext';
 
 export default function SettingsScreen() {
   const { colors } = useTheme();
+  const { isDarkMode, setIsDarkMode } = useThemeContext();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="auto" />
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? '#000' : '#fff' }]}>
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.text }]}>Configuración</Text>
+        <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#000' }]}>
+          Configuración
+        </Text>
         
-        <View style={styles.settingItem}>
-          <Text style={[styles.settingText, { color: colors.text }]}>Notificaciones</Text>
+        <View style={[styles.settingItem, { borderBottomColor: isDarkMode ? '#333' : '#eee' }]}>
+          <Text style={[styles.settingText, { color: isDarkMode ? '#fff' : '#000' }]}>
+            Notificaciones
+          </Text>
           <Switch
             value={notificationsEnabled}
             onValueChange={setNotificationsEnabled}
           />
         </View>
 
-        <View style={styles.settingItem}>
-          <Text style={[styles.settingText, { color: colors.text }]}>Modo Oscuro</Text>
+        <View style={[styles.settingItem, { borderBottomColor: isDarkMode ? '#333' : '#eee' }]}>
+          <Text style={[styles.settingText, { color: isDarkMode ? '#fff' : '#000' }]}>
+            Modo Oscuro
+          </Text>
           <Switch
-            value={darkMode}
-            onValueChange={setDarkMode}
+            value={isDarkMode}
+            onValueChange={setIsDarkMode}
           />
         </View>
 
@@ -42,7 +49,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
@@ -61,7 +67,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   settingText: {
     fontSize: 16,

@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider } from './src/context/ThemeContext';
 import TabNavigator from './src/navigation/TabNavigator';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -28,9 +29,11 @@ export default function App() {
     }
 
     return (
-        <NavigationContainer onReady={onLayoutRootView}>
-            <StatusBar style="auto" />
-            <TabNavigator />
-        </NavigationContainer>
+        <ThemeProvider>
+            <NavigationContainer onReady={onLayoutRootView}>
+                <StatusBar style="auto" />
+                <TabNavigator />
+            </NavigationContainer>
+        </ThemeProvider>
     );
 }
