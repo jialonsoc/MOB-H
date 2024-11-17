@@ -1,4 +1,4 @@
-import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text, Image } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text, Image, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { HABIT_TYPES } from '../utils/constants';
@@ -38,103 +38,115 @@ export default function AddHabitInput({ value, onChangeText, onSubmit }) {
         setSelectedCategory('');
         setImage(null);
         setShowModal(false);
+        Keyboard.dismiss();
     };
 
     return (
         <View style={styles.container}>
-            <TextInput
-                style={styles.input}
-                value={habitName}
-                onChangeText={setHabitName}
-                placeholder="Añadir nuevo hábito"
-                placeholderTextColor="#666"
-                returnKeyType="done"
-                onSubmitEditing={() => setShowModal(true)}
-            />
-            <TouchableOpacity 
-                style={styles.addButton}
-                onPress={() => setShowModal(true)}
-            >
-                <Ionicons name="add" size={24} color="#fff" />
-            </TouchableOpacity>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.input}
+                        value={habitName}
+                        onChangeText={setHabitName}
+                        placeholder="Añadir nuevo hábito"
+                        placeholderTextColor="#666"
+                        returnKeyType="done"
+                        onSubmitEditing={() => setShowModal(true)}
+                    />
+                    <TouchableOpacity 
+                        style={styles.addButton}
+                        onPress={() => setShowModal(true)}
+                    >
+                        <Ionicons name="add" size={24} color="#fff" />
+                    </TouchableOpacity>
+                </View>
+            </TouchableWithoutFeedback>
 
             <Modal
                 visible={showModal}
                 animationType="slide"
                 transparent={true}
             >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Nuevo Hábito</Text>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Nuevo Hábito</Text>
 
-                        <TextInput
-                            style={styles.modalInput}
-                            value={habitName}
-                            onChangeText={setHabitName}
-                            placeholder="Nombre del hábito"
-                            placeholderTextColor="#666"
-                        />
+                            <TextInput
+                                style={styles.modalInput}
+                                value={habitName}
+                                onChangeText={setHabitName}
+                                placeholder="Nombre del hábito"
+                                placeholderTextColor="#666"
+                                returnKeyType="done"
+                                onSubmitEditing={Keyboard.dismiss}
+                            />
 
-                        <TouchableOpacity 
-                            style={styles.imageContainer}
-                            onPress={pickImage}
-                        >
-                            {image ? (
-                                <Image 
-                                    source={{ uri: image }} 
-                                    style={styles.habitImage} 
-                                />
-                            ) : (
-                                <View style={styles.placeholderContainer}>
-                                    <Ionicons name="camera" size={40} color="#666" />
-                                    <Text style={styles.placeholderText}>
-                                        Añadir foto (opcional)
+                            <TouchableOpacity 
+                                style={styles.imageContainer}
+                                onPress={pickImage}
+                            >
+                                {image ? (
+                                    <Image 
+                                        source={{ uri: image }} 
+                                        style={styles.habitImage} 
+                                    />
+                                ) : (
+                                    <View style={styles.placeholderContainer}>
+                                        <Ionicons name="camera" size={40} color="#666" />
+                                        <Text style={styles.placeholderText}>
+                                            Añadir foto (opcional)
+                                        </Text>
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+
+                            <Text style={styles.sectionTitle}>Selecciona una categoría</Text>
+                            
+                            {HABIT_TYPES.filter(type => type.id !== 'all').map((type) => (
+                                <TouchableOpacity
+                                    key={type.id}
+                                    style={[
+                                        styles.categoryButton,
+                                        selectedCategory === type.id && styles.selectedCategory
+                                    ]}
+                                    onPress={() => setSelectedCategory(type.id)}
+                                >
+                                    <Text style={[
+                                        styles.categoryText,
+                                        selectedCategory === type.id && styles.selectedCategoryText
+                                    ]}>
+                                        {type.label}
                                     </Text>
-                                </View>
-                            )}
-                        </TouchableOpacity>
+                                </TouchableOpacity>
+                            ))}
 
-                        <Text style={styles.sectionTitle}>Selecciona una categoría</Text>
-                        
-                        {HABIT_TYPES.filter(type => type.id !== 'all').map((type) => (
-                            <TouchableOpacity
-                                key={type.id}
-                                style={[
-                                    styles.categoryButton,
-                                    selectedCategory === type.id && styles.selectedCategory
-                                ]}
-                                onPress={() => setSelectedCategory(type.id)}
-                            >
-                                <Text style={[
-                                    styles.categoryText,
-                                    selectedCategory === type.id && styles.selectedCategoryText
-                                ]}>
-                                    {type.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity 
+                                    style={styles.cancelButton}
+                                    onPress={resetForm}
+                                >
+                                    <Text style={styles.cancelText}>Cancelar</Text>
+                                </TouchableOpacity>
 
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity 
-                                style={styles.cancelButton}
-                                onPress={resetForm}
-                            >
-                                <Text style={styles.cancelText}>Cancelar</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity 
-                                style={[
-                                    styles.createButton,
-                                    (!habitName.trim() || !selectedCategory) && styles.disabledButton
-                                ]}
-                                onPress={handleSubmit}
-                                disabled={!habitName.trim() || !selectedCategory}
-                            >
-                                <Text style={styles.createButtonText}>Crear Hábito</Text>
-                            </TouchableOpacity>
+                                <TouchableOpacity 
+                                    style={[
+                                        styles.createButton,
+                                        (!habitName.trim() || !selectedCategory) && styles.disabledButton
+                                    ]}
+                                    onPress={() => {
+                                        handleSubmit();
+                                        Keyboard.dismiss();
+                                    }}
+                                    disabled={!habitName.trim() || !selectedCategory}
+                                >
+                                    <Text style={styles.createButtonText}>Crear Hábito</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
         </View>
     );
@@ -280,5 +292,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         width: '100%',
         marginTop: 20,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
 });

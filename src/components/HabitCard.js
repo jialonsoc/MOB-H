@@ -76,10 +76,13 @@ export default function HabitCard({ habit, onDelete, onIncrement }) {
     {habit.image ? (
         <Image 
             source={{ uri: habit.image }} 
-            style={styles.habitImage} 
+            style={styles.habitImage}
+            resizeMode="cover"
         />
     ) : (
-        <View style={styles.noImageContainer}>
+        <View style={[styles.noImageContainer, {
+            backgroundColor: isDarkMode ? '#333' : '#f0f0f0'
+        }]}>
             <Text style={[styles.noImageText, { 
                 color: isDarkMode ? '#666' : '#999' 
             }]}>

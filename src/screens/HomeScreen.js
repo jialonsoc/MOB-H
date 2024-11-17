@@ -44,13 +44,14 @@ export default function HomeScreen() {
         }
     };
 
-    const addHabit = async (habitName, category) => {
-        if (habitName.trim() && category) {
+    const addHabit = async (habitName, category, image) => {
+        if (habitName.trim()) {
             const newHabit = {
                 id: Date.now().toString(),
                 name: habitName.trim(),
                 type: category,
                 count: 0,
+                image: image,
                 createdAt: new Date().toISOString(),
             };
 
