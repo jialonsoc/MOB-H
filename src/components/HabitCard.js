@@ -4,7 +4,8 @@ import {
     View, 
     Text, 
     StyleSheet, 
-    TouchableOpacity 
+    TouchableOpacity,
+    Image
 } from 'react-native';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';

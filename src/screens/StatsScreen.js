@@ -5,7 +5,7 @@ import { useTheme } from '@react-navigation/native';
 import { useThemeContext } from '../context/ThemeContext';
 import { BarChart } from 'react-native-chart-kit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
 export default function StatsScreen() {
@@ -18,7 +18,7 @@ export default function StatsScreen() {
     datasets: [{ data: [] }]
   });
   
-  const animationValue = new Animated.Value(0);
+  const animationValue = useRef(new Animated.Value(0)).current;
 
   useFocusEffect(
     useCallback(() => {
@@ -29,6 +29,7 @@ export default function StatsScreen() {
             const parsedHabits = JSON.parse(savedHabits);
             setHabits(parsedHabits);
             
+            animationValue.setValue(0);
             Animated.spring(animationValue, {
               toValue: 1,
               useNativeDriver: true,
@@ -53,7 +54,7 @@ export default function StatsScreen() {
       loadHabits();
       const intervalId = setInterval(loadHabits, 1000);
       return () => clearInterval(intervalId);
-    }, [])
+    }, [animationValue])
   );
 
   const chartData = {
