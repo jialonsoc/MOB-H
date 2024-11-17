@@ -8,8 +8,10 @@ import {
 } from 'react-native';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
+import { useThemeContext } from '../context/ThemeContext';
 
 export default function HabitCard({ habit, onDelete, onIncrement }) {
+    const { isDarkMode } = useThemeContext();
     const translateX = new Animated.Value(0);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -51,10 +53,16 @@ export default function HabitCard({ habit, onDelete, onIncrement }) {
                     }
                 ]}
             >
-                <View style={styles.card}>
+                <View style={[styles.card, {
+                    backgroundColor: isDarkMode ? '#1c1c1e' : '#fff',
+                }]}>
                     <View style={styles.content}>
-                        <Text style={styles.title}>{habit.name}</Text>
-                        <Text style={styles.count}>
+                        <Text style={[styles.title, { 
+                            color: isDarkMode ? '#fff' : '#000' 
+                        }]}>{habit.name}</Text>
+                        <Text style={[styles.count, { 
+                            color: isDarkMode ? '#999' : '#666' 
+                        }]}>
                             Realizado: {habit.count || 0} veces
                         </Text>
                     </View>

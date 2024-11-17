@@ -2,20 +2,27 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@react-navigation/native';
+import { useThemeContext } from '../context/ThemeContext';
 
 export default function StatsScreen() {
   const { colors } = useTheme();
+  const { isDarkMode } = useThemeContext();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="auto" />
+    <SafeAreaView style={[styles.container, { 
+      backgroundColor: isDarkMode ? '#000' : '#fff' 
+    }]}>
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.text }]}>
+        <Text style={[styles.title, { 
+          color: isDarkMode ? '#fff' : '#000' 
+        }]}>
           Estadísticas
         </Text>
         <View style={styles.statsContainer}>
-          {/* Aquí puedes agregar tus componentes de estadísticas */}
-          <Text style={[styles.statsText, { color: colors.text }]}>
+          <Text style={[styles.statsText, { 
+            color: isDarkMode ? '#fff' : '#000' 
+          }]}>
             Tus estadísticas aparecerán aquí
           </Text>
         </View>
@@ -27,7 +34,6 @@ export default function StatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
     flex: 1,

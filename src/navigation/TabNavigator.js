@@ -3,10 +3,13 @@ import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import StatsScreen from '../screens/StatsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import { useThemeContext } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
+    const { isDarkMode } = useThemeContext();
+
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -22,7 +25,15 @@ export default function TabNavigator() {
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
                 tabBarActiveTintColor: '#007AFF',
-                tabBarInactiveTintColor: 'gray',
+                tabBarInactiveTintColor: isDarkMode ? '#666' : 'gray',
+                tabBarStyle: {
+                    backgroundColor: isDarkMode ? '#000' : '#fff',
+                    borderTopColor: isDarkMode ? '#333' : '#eee',
+                },
+                headerStyle: {
+                    backgroundColor: isDarkMode ? '#000' : '#fff',
+                },
+                headerTintColor: isDarkMode ? '#fff' : '#000',
             })}
         >
             <Tab.Screen name="Hábitos" component={HomeScreen} />

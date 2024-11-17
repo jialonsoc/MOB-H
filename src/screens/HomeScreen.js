@@ -14,8 +14,10 @@ import HabitCard from '../components/HabitCard';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
 import AddHabitInput from '../components/AddHabitInput';
+import { useThemeContext } from '../context/ThemeContext';
 
 export default function HomeScreen() {
+    const { isDarkMode } = useThemeContext();
     const [habits, setHabits] = useState([]);
     const [newHabitName, setNewHabitName] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -84,7 +86,10 @@ export default function HomeScreen() {
     });
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { 
+            backgroundColor: isDarkMode ? '#000' : '#fff' 
+        }]}>
+            <StatusBar style={isDarkMode ? 'light' : 'dark'} />
             <SearchBar
                 value={searchQuery}
                 onChangeText={setSearchQuery}
