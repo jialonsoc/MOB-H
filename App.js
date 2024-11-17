@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import Navigation from './src/navigation';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import TabNavigator from './src/navigation/TabNavigator';
+import LandingScreen from './src/screens/LandingScreen';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -9,6 +11,8 @@ import {
   Inter_400Regular,
   Inter_700Bold 
 } from '@expo-google-fonts/inter';
+
+const Stack = createNativeStackNavigator();
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,7 +36,13 @@ export default function App() {
         <ThemeProvider>
             <NavigationContainer onReady={onLayoutRootView}>
                 <StatusBar style="auto" />
-                <Navigation />
+                <Stack.Navigator 
+                    initialRouteName="Landing"
+                    screenOptions={{ headerShown: false }}
+                >
+                    <Stack.Screen name="Landing" component={LandingScreen} />
+                    <Stack.Screen name="MainTabs" component={TabNavigator} />
+                </Stack.Navigator>
             </NavigationContainer>
         </ThemeProvider>
     );
