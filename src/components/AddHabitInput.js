@@ -1,6 +1,6 @@
-import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text, Image, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Modal, Text, Image, Keyboard, TouchableWithoutFeedback, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HABIT_TYPES } from '../utils/constants';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -10,16 +10,71 @@ export default function AddHabitInput({ value, onChangeText, onSubmit }) {
     const [habitName, setHabitName] = useState('');
     const [image, setImage] = useState(null);
 
-    const pickImage = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 1,
-        });
+    useEffect(() => {
+        (async () => {
+            const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+            const { status: libraryStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            
+            if (cameraStatus !== 'granted' || libraryStatus !== 'granted') {
+                Alert.alert(
+                    'Permisos necesarios',
+                    'Necesitamos acceso a tu cámara y galería para esta función'
+                );
+            }
+        })();
+    }, []);
 
-        if (!result.canceled) {
-            setImage(result.assets[0].uri);
+    const showImageOptions = () => {
+        Alert.alert(
+            'Añadir foto',
+            '¿Cómo quieres añadir la foto?',
+            [
+                {
+                    text: 'Tomar foto',
+                    onPress: takePhoto
+                },
+                {
+                    text: 'Elegir de galería',
+                    onPress: pickImage
+                },
+                {
+                    text: 'Cancelar',
+                    style: 'cancel'
+                }
+            ]
+        );
+    };
+
+    const takePhoto = async () => {
+        try {
+            const result = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+            });
+
+            if (!result.canceled) {
+                setImage(result.assets[0].uri);
+            }
+        } catch (error) {
+            Alert.alert('Error', 'No se pudo tomar la foto');
+        }
+    };
+
+    const pickImage = async () => {
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+            });
+
+            if (!result.canceled) {
+                setImage(result.assets[0].uri);
+            }
+        } catch (error) {
+            Alert.alert('Error', 'No se pudo seleccionar la imagen');
         }
     };
 
@@ -75,13 +130,21 @@ export default function AddHabitInput({ value, onChangeText, onSubmit }) {
 
                             <TouchableOpacity 
                                 style={styles.imageContainer}
-                                onPress={pickImage}
+                                onPress={showImageOptions}
                             >
                                 {image ? (
-                                    <Image 
-                                        source={{ uri: image }} 
-                                        style={styles.habitImage} 
-                                    />
+                                    <View style={styles.imageWrapper}>
+                                        <Image 
+                                            source={{ uri: image }} 
+                                            style={styles.habitImage} 
+                                        />
+                                        <TouchableOpacity 
+                                            style={styles.removeImageButton}
+                                            onPress={() => setImage(null)}
+                                        >
+                                            <Ionicons name="close-circle" size={24} color="#ff4444" />
+                                        </TouchableOpacity>
+                                    </View>
                                 ) : (
                                     <View style={styles.placeholderContainer}>
                                         <Ionicons name="camera" size={40} color="#666" />
@@ -226,6 +289,28 @@ const styles = StyleSheet.create({
     disabledButton: {
         backgroundColor: '#cccccc',
     },
+    imageWrapper: {
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+    },
+    removeImageButton: {
+        position: 'absolute',
+        top: -10,
+        right: -10,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+    },
+    habitImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 60,
+    },
     imageContainer: {
         width: 120,
         height: 120,
@@ -235,10 +320,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 20,
         overflow: 'hidden',
-    },
-    habitImage: {
-        width: '100%',
-        height: '100%',
     },
     placeholderContainer: {
         alignItems: 'center',
