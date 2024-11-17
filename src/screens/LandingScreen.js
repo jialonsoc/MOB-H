@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function LandingScreen({ navigation }) {
   const { isDarkMode } = useThemeContext();
@@ -29,11 +30,11 @@ export default function LandingScreen({ navigation }) {
         </Text>
 
         <View style={styles.imageContainer}>
-          {/* Puedes agregar una imagen ilustrativa aquí */}
-          <Image
-            source={require('../../assets/habits-icon.png')} // Asegúrate de tener esta imagen
-            style={styles.image}
-            resizeMode="contain"
+          <Ionicons 
+            name="leaf-outline" 
+            size={120} 
+            color={isDarkMode ? '#fff' : '#000'}
+            style={styles.icon}
           />
         </View>
 
@@ -113,10 +114,11 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width * 0.7,
     height: 200,
     marginBottom: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  image: {
-    width: '100%',
-    height: '100%',
+  icon: {
+    opacity: 0.9,
   },
   featuresContainer: {
     width: '100%',
