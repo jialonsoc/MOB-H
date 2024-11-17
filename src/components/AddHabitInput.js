@@ -33,6 +33,13 @@ export default function AddHabitInput({ value, onChangeText, onSubmit }) {
         }
     };
 
+    const resetForm = () => {
+        setHabitName('');
+        setSelectedCategory('');
+        setImage(null);
+        setShowModal(false);
+    };
+
     return (
         <View style={styles.container}>
             <TextInput
@@ -59,6 +66,14 @@ export default function AddHabitInput({ value, onChangeText, onSubmit }) {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Nuevo Hábito</Text>
+
+                        <TextInput
+                            style={styles.modalInput}
+                            value={habitName}
+                            onChangeText={setHabitName}
+                            placeholder="Nombre del hábito"
+                            placeholderTextColor="#666"
+                        />
 
                         <TouchableOpacity 
                             style={styles.imageContainer}
@@ -88,10 +103,7 @@ export default function AddHabitInput({ value, onChangeText, onSubmit }) {
                                     styles.categoryButton,
                                     selectedCategory === type.id && styles.selectedCategory
                                 ]}
-                                onPress={() => {
-                                    setSelectedCategory(type.id);
-                                    handleSubmit();
-                                }}
+                                onPress={() => setSelectedCategory(type.id)}
                             >
                                 <Text style={[
                                     styles.categoryText,
@@ -102,15 +114,25 @@ export default function AddHabitInput({ value, onChangeText, onSubmit }) {
                             </TouchableOpacity>
                         ))}
 
-                        <TouchableOpacity 
-                            style={styles.cancelButton}
-                            onPress={() => {
-                                setShowModal(false);
-                                setImage(null);
-                            }}
-                        >
-                            <Text style={styles.cancelText}>Cancelar</Text>
-                        </TouchableOpacity>
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity 
+                                style={styles.cancelButton}
+                                onPress={resetForm}
+                            >
+                                <Text style={styles.cancelText}>Cancelar</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity 
+                                style={[
+                                    styles.createButton,
+                                    (!habitName.trim() || !selectedCategory) && styles.disabledButton
+                                ]}
+                                onPress={handleSubmit}
+                                disabled={!habitName.trim() || !selectedCategory}
+                            >
+                                <Text style={styles.createButtonText}>Crear Hábito</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -161,8 +183,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 20,
         padding: 20,
-        width: '80%',
-        alignItems: 'center',
+        width: '90%',
+        maxHeight: '80%',
     },
     modalTitle: {
         fontSize: 18,
@@ -188,12 +210,32 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     cancelButton: {
-        marginTop: 10,
         padding: 15,
+        width: '45%',
+        alignItems: 'center',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ff4444',
     },
     cancelText: {
         color: '#ff4444',
         fontSize: 16,
+        fontWeight: 'bold',
+    },
+    createButton: {
+        backgroundColor: '#007AFF',
+        padding: 15,
+        width: '45%',
+        alignItems: 'center',
+        borderRadius: 8,
+    },
+    createButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    disabledButton: {
+        backgroundColor: '#cccccc',
     },
     imageContainer: {
         width: 120,
@@ -223,5 +265,20 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 15,
         alignSelf: 'flex-start',
-    }
+    },
+    modalInput: {
+        width: '100%',
+        height: 50,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 10,
+        paddingHorizontal: 15,
+        marginBottom: 20,
+        fontSize: 16,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginTop: 20,
+    },
 });
