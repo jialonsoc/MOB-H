@@ -5,30 +5,39 @@ import { useTheme } from '@react-navigation/native';
 import { useThemeContext } from '../context/ThemeContext';
 import { BarChart } from 'react-native-chart-kit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function StatsScreen() {
   const { colors } = useTheme();
   const { isDarkMode } = useThemeContext();
   const [habits, setHabits] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  useEffect(() => {
-    loadHabits();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const loadHabits = async () => {
+        try {
+          const savedHabits = await AsyncStorage.getItem('habits');
+          if (savedHabits) {
+            setHabits(JSON.parse(savedHabits));
+            setRefreshKey(prev => prev + 1);
+          }
+        } catch (error) {
+          console.error('Error loading habits:', error);
+        }
+      };
 
-  const loadHabits = async () => {
-    try {
-      const savedHabits = await AsyncStorage.getItem('habits');
-      if (savedHabits) {
-        setHabits(JSON.parse(savedHabits));
-      }
-    } catch (error) {
-      console.error('Error loading habits:', error);
-    }
-  };
+      loadHabits();
+
+      const intervalId = setInterval(loadHabits, 1000);
+
+      return () => clearInterval(intervalId);
+    }, [])
+  );
 
   const chartData = {
-    labels: habits.map(habit => habit.name.substring(0, 10) + '...'), // Acorta nombres largos
+    labels: habits.map(habit => habit.name.substring(0, 10) + (habit.name.length > 10 ? '...' : '')),
     datasets: [{
       data: habits.map(habit => habit.count || 0)
     }]
@@ -45,6 +54,9 @@ export default function StatsScreen() {
       borderRadius: 16,
     },
     barPercentage: 0.5,
+    propsForLabels: {
+      fontSize: 12,
+    },
   };
 
   return (
@@ -62,6 +74,7 @@ export default function StatsScreen() {
         {habits.length > 0 ? (
           <View style={styles.chartContainer}>
             <BarChart
+              key={refreshKey}
               data={chartData}
               width={Dimensions.get('window').width - 40}
               height={220}

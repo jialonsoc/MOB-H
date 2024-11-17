@@ -41,12 +41,12 @@ export default function HomeScreen() {
         }
     };
 
-    const addHabit = async () => {
-        if (newHabitName.trim()) {
+    const addHabit = async (habitName, category) => {
+        if (habitName.trim() && category) {
             const newHabit = {
                 id: Date.now().toString(),
-                name: newHabitName.trim(),
-                type: 'personal',
+                name: habitName.trim(),
+                type: category,
                 count: 0,
                 createdAt: new Date().toISOString(),
             };
@@ -55,9 +55,6 @@ export default function HomeScreen() {
             setHabits(updatedHabits);
             await AsyncStorage.setItem('habits', JSON.stringify(updatedHabits));
             setNewHabitName('');
-            Keyboard.dismiss();
-        } else {
-            Alert.alert('Error', 'Por favor ingresa un nombre para el hábito');
         }
     };
 
@@ -78,11 +75,8 @@ export default function HomeScreen() {
     };
 
     const filteredHabits = habits.filter(habit => {
-        const matchesSearch = habit.name
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase());
-        const matchesType = filterType === 'all' || habit.type === filterType;
-        return matchesSearch && matchesType;
+        if (filterType === 'all') return true;
+        return habit.type === filterType;
     });
 
     return (
