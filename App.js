@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import Navigation from './src/navigation';
 import { ThemeProvider } from './src/context/ThemeContext';
-import TabNavigator from './src/navigation/TabNavigator';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -32,7 +32,7 @@ export default function App() {
         <ThemeProvider>
             <NavigationContainer onReady={onLayoutRootView}>
                 <StatusBar style="auto" />
-                <TabNavigator />
+                <Navigation />
             </NavigationContainer>
         </ThemeProvider>
     );
