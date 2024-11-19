@@ -25,7 +25,6 @@ export default function HabitCard({ habit, onDelete, onIncrement }) {
     const handleDecrease = () => {
         setCount((prevCount) => {
             if (prevCount > 0) {
-                // Aquí deberías agregar una función onDecrement similar a onIncrement
                 return prevCount - 1;
             }
             return prevCount;
