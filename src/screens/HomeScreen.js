@@ -17,6 +17,7 @@ import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
 import AddHabitInput from '../components/AddHabitInput';
 import { useThemeContext } from '../context/ThemeContext';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export default function HomeScreen() {
     const { isDarkMode } = useThemeContext();
@@ -79,8 +80,13 @@ export default function HomeScreen() {
     };
 
     const filteredHabits = habits.filter(habit => {
-        if (filterType === 'all') return true;
-        return habit.type === filterType;
+        const matchesType = filterType === 'all' || habit.type === filterType;
+        
+        const matchesSearch = searchQuery
+            ? habit.name.toLowerCase().includes(searchQuery.toLowerCase())
+            : true;
+
+        return matchesType && matchesSearch;
     });
 
     const onRefresh = useCallback(async () => {
@@ -94,6 +100,7 @@ export default function HomeScreen() {
             backgroundColor: isDarkMode ? '#000' : '#fff' 
         }]}>
             <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+            
             <SearchBar
                 value={searchQuery}
                 onChangeText={setSearchQuery}
@@ -123,14 +130,31 @@ export default function HomeScreen() {
                     />
                 }
             >
-                {filteredHabits.map(habit => (
-                    <HabitCard
-                        key={habit.id}
-                        habit={habit}
-                        onDelete={deleteHabit}
-                        onIncrement={incrementHabitCount}
-                    />
-                ))}
+                {filteredHabits.length > 0 ? (
+                    filteredHabits.map(habit => (
+                        <HabitCard
+                            key={habit.id}
+                            habit={habit}
+                            onDelete={deleteHabit}
+                            onIncrement={incrementHabitCount}
+                        />
+                    ))
+                ) : (
+                    <View style={styles.emptyContainer}>
+                        <Ionicons 
+                            name="search-outline" 
+                            size={50} 
+                            color={isDarkMode ? '#333' : '#ccc'} 
+                        />
+                        <Text style={[
+                            styles.emptyText,
+                            { color: isDarkMode ? '#666' : '#999' }
+                        ]}>
+                            No se encontraron hábitos
+                            {searchQuery ? ` que contengan "${searchQuery}"` : ''}
+                        </Text>
+                    </View>
+                )}
             </ScrollView>
         </SafeAreaView>
     );
@@ -148,5 +172,15 @@ const styles = StyleSheet.create({
     habitList: {
         padding: 16,
         paddingTop: 8,
-    }
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 16,
+    },
 });
