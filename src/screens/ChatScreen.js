@@ -1,182 +1,214 @@
-import { useState, useEffect, useRef } from 'react';
-import { 
-    View, 
-    Text, 
-    FlatList, 
-    TextInput, 
-    TouchableOpacity, 
-    Image,
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    FlatList,
     StyleSheet,
     KeyboardAvoidingView,
-    Platform
+    Platform,
+    Image
 } from 'react-native';
-import { useAuth } from '../context/AuthContext';
 import { useThemeContext } from '../context/ThemeContext';
-import * as ImagePicker from 'expo-image-picker';
+import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ChatScreen() {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [image, setImage] = useState(null);
-    const [mentionedUsers, setMentionedUsers] = useState([]);
-    const { user } = useAuth();
     const { isDarkMode } = useThemeContext();
+    const { user } = useAuth();
     const flatListRef = useRef();
 
     useEffect(() => {
-        // Aquí conectarías con tu backend para cargar mensajes
         loadMessages();
     }, []);
 
     const loadMessages = async () => {
         try {
-            const response = await fetch('TU_API/messages');
-            const data = await response.json();
-            setMessages(data);
+            const savedMessages = await AsyncStorage.getItem('chat_messages');
+            if (savedMessages) {
+                setMessages(JSON.parse(savedMessages));
+            }
         } catch (error) {
-            console.error('Error cargando mensajes:', error);
+            console.error('Error loading messages:', error);
         }
     };
 
     const pickImage = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 1,
+            });
 
-        if (!result.canceled) {
-            setImage(result.assets[0].uri);
+            if (!result.canceled) {
+                setImage(result.assets[0].uri);
+            }
+        } catch (error) {
+            console.error('Error picking image:', error);
         }
-    };
-
-    const handleMention = (text) => {
-        if (text.endsWith('@')) {
-            // Aquí podrías mostrar una lista de usuarios para mencionar
-            // Por ahora solo agregamos un usuario de ejemplo
-            setMentionedUsers([...mentionedUsers, {
-                id: '123',
-                name: 'Usuario'
-            }]);
-        }
-        setNewMessage(text);
     };
 
     const sendMessage = async () => {
         if (!newMessage.trim() && !image) return;
 
-        const messageData = new FormData();
-        messageData.append('text', newMessage);
-        messageData.append('mentionedUsers', JSON.stringify(mentionedUsers));
+        const newMsg = {
+            id: Date.now().toString(),
+            text: newMessage.trim(),
+            image: image,
+            userId: user?.id || 'guest',
+            userName: user?.name || 'Invitado',
+            timestamp: new Date().toISOString(),
+        };
+
+        const updatedMessages = [...messages, newMsg];
         
-        if (image) {
-            messageData.append('image', {
-                uri: image,
-                type: 'image/jpeg',
-                name: 'photo.jpg',
-            });
-        }
-
         try {
-            const response = await fetch('TU_API/messages', {
-                method: 'POST',
-                body: messageData,
-            });
-
-            if (response.ok) {
-                setNewMessage('');
-                setImage(null);
-                setMentionedUsers([]);
-                loadMessages();
-            }
+            await AsyncStorage.setItem('chat_messages', JSON.stringify(updatedMessages));
+            setMessages(updatedMessages);
+            setNewMessage('');
+            setImage(null);
+            
+            // Scroll to bottom
+            flatListRef.current?.scrollToEnd();
         } catch (error) {
-            console.error('Error enviando mensaje:', error);
+            console.error('Error sending message:', error);
         }
     };
 
-    if (!user) {
+    const renderMessage = ({ item }) => {
+        const isOwnMessage = item.userId === (user?.id || 'guest');
+
         return (
-            <View style={styles.container}>
-                <Text>Por favor inicia sesión para acceder al chat</Text>
+            <View style={[
+                styles.messageContainer,
+                isOwnMessage ? styles.ownMessage : styles.otherMessage,
+                { backgroundColor: isOwnMessage ? 
+                    (isDarkMode ? '#0A84FF' : '#007AFF') : 
+                    (isDarkMode ? '#333' : '#E5E5EA') 
+                }
+            ]}>
+                {!isOwnMessage && (
+                    <Text style={[
+                        styles.userName,
+                        { color: isDarkMode ? '#999' : '#666' }
+                    ]}>
+                        {item.userName}
+                    </Text>
+                )}
+                
+                {item.image && (
+                    <Image 
+                        source={{ uri: item.image }}
+                        style={styles.messageImage}
+                    />
+                )}
+                
+                {item.text && (
+                    <Text style={[
+                        styles.messageText,
+                        { 
+                            color: isOwnMessage ? '#fff' : 
+                                (isDarkMode ? '#fff' : '#000')
+                        }
+                    ]}>
+                        {item.text}
+                    </Text>
+                )}
+                
+                <Text style={[
+                    styles.timestamp,
+                    { color: isOwnMessage ? '#fff' : '#666' }
+                ]}>
+                    {new Date(item.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                </Text>
             </View>
         );
-    }
+    };
 
     return (
         <KeyboardAvoidingView 
-            style={[styles.container, { 
-                backgroundColor: isDarkMode ? '#000' : '#fff' 
+            style={[styles.container, {
+                backgroundColor: isDarkMode ? '#000' : '#fff'
             }]}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
         >
             <FlatList
                 ref={flatListRef}
                 data={messages}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <View style={[
-                        styles.messageContainer,
-                        item.userId === user.id ? styles.ownMessage : styles.otherMessage
-                    ]}>
-                        {item.image && (
-                            <Image 
-                                source={{ uri: item.image }} 
-                                style={styles.messageImage} 
-                            />
-                        )}
-                        <Text style={[
-                            styles.messageText,
-                            { color: isDarkMode ? '#fff' : '#000' }
-                        ]}>
-                            {item.text}
-                        </Text>
-                        {item.mentionedUsers?.map(mentioned => (
-                            <Text key={mentioned.id} style={styles.mention}>
-                                @{mentioned.name}
-                            </Text>
-                        ))}
-                    </View>
-                )}
-                onContentSizeChange={() => flatListRef.current.scrollToEnd()}
+                renderItem={renderMessage}
+                keyExtractor={item => item.id}
+                contentContainerStyle={styles.messagesList}
+                onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
             />
 
-            <View style={styles.inputContainer}>
-                {image && (
-                    <View style={styles.imagePreview}>
-                        <Image source={{ uri: image }} style={styles.previewImage} />
-                        <TouchableOpacity 
-                            style={styles.removeImage}
-                            onPress={() => setImage(null)}
-                        >
-                            <Ionicons name="close-circle" size={24} color="red" />
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                <View style={styles.inputRow}>
-                    <TouchableOpacity onPress={pickImage}>
-                        <Ionicons name="image" size={24} color="#007AFF" />
-                    </TouchableOpacity>
-
-                    <TextInput
-                        style={[styles.input, { 
-                            color: isDarkMode ? '#fff' : '#000' 
-                        }]}
-                        value={newMessage}
-                        onChangeText={handleMention}
-                        placeholder="Escribe un mensaje..."
-                        placeholderTextColor={isDarkMode ? '#666' : '#999'}
+            {image && (
+                <View style={styles.imagePreview}>
+                    <Image 
+                        source={{ uri: image }} 
+                        style={styles.previewImage} 
                     />
-
                     <TouchableOpacity 
-                        style={styles.sendButton}
-                        onPress={sendMessage}
+                        style={styles.removeImage}
+                        onPress={() => setImage(null)}
                     >
-                        <Ionicons name="send" size={24} color="#fff" />
+                        <Ionicons name="close-circle" size={24} color="#FF3B30" />
                     </TouchableOpacity>
                 </View>
+            )}
+
+            <View style={[
+                styles.inputContainer,
+                { backgroundColor: isDarkMode ? '#1C1C1E' : '#fff' }
+            ]}>
+                <TouchableOpacity onPress={pickImage}>
+                    <Ionicons 
+                        name="image" 
+                        size={24} 
+                        color="#007AFF" 
+                    />
+                </TouchableOpacity>
+
+                <TextInput
+                    style={[
+                        styles.input,
+                        { 
+                            backgroundColor: isDarkMode ? '#333' : '#f0f0f0',
+                            color: isDarkMode ? '#fff' : '#000'
+                        }
+                    ]}
+                    value={newMessage}
+                    onChangeText={setNewMessage}
+                    placeholder="Escribe un mensaje..."
+                    placeholderTextColor={isDarkMode ? '#666' : '#999'}
+                    multiline
+                />
+
+                <TouchableOpacity 
+                    style={[
+                        styles.sendButton,
+                        (!newMessage.trim() && !image) && styles.sendButtonDisabled
+                    ]}
+                    onPress={sendMessage}
+                    disabled={!newMessage.trim() && !image}
+                >
+                    <Ionicons 
+                        name="send" 
+                        size={24} 
+                        color={(!newMessage.trim() && !image) ? '#999' : '#fff'} 
+                    />
+                </TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
     );
@@ -186,19 +218,26 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    messagesList: {
+        padding: 16,
+    },
     messageContainer: {
-        margin: 10,
-        padding: 10,
-        borderRadius: 10,
         maxWidth: '80%',
+        marginVertical: 4,
+        padding: 12,
+        borderRadius: 20,
     },
     ownMessage: {
         alignSelf: 'flex-end',
-        backgroundColor: '#007AFF',
+        borderBottomRightRadius: 4,
     },
     otherMessage: {
         alignSelf: 'flex-start',
-        backgroundColor: '#E5E5EA',
+        borderBottomLeftRadius: 4,
+    },
+    userName: {
+        fontSize: 12,
+        marginBottom: 4,
     },
     messageText: {
         fontSize: 16,
@@ -250,5 +289,9 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: -10,
         right: -10,
+    },
+    timestamp: {
+        fontSize: 12,
+        marginTop: 4,
     },
 });

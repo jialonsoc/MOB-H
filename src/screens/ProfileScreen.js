@@ -14,8 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function ProfileScreen() {
-    const { isDarkMode } = useThemeContext();
-    const { user, setUser } = useAuth();
+    const { isDarkMode, toggleTheme } = useThemeContext();
+    const { user, setUser, logout } = useAuth();
     const [image, setImage] = useState(user?.profileImage);
 
     const pickImage = async () => {
@@ -141,9 +141,10 @@ export default function ProfileScreen() {
                         styles.settingItem,
                         { borderBottomColor: isDarkMode ? '#333' : '#f0f0f0' }
                     ]}
+                    onPress={toggleTheme}
                 >
                     <Ionicons 
-                        name="moon-outline" 
+                        name={isDarkMode ? "sunny-outline" : "moon-outline"}
                         size={24} 
                         color={isDarkMode ? '#fff' : '#000'}
                     />
@@ -151,13 +152,13 @@ export default function ProfileScreen() {
                         styles.settingText,
                         { color: isDarkMode ? '#fff' : '#000' }
                     ]}>
-                        Tema
+                        {isDarkMode ? 'Modo claro' : 'Modo oscuro'}
                     </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
                     style={styles.settingItem}
-                    onPress={() => {/* Función de logout */}}
+                    onPress={logout}
                 >
                     <Ionicons 
                         name="log-out-outline" 
