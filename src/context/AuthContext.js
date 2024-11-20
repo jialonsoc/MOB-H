@@ -1,13 +1,12 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Función para cargar el usuario al inicio
     useEffect(() => {
         loadUser();
     }, []);
@@ -28,7 +27,8 @@ export function AuthProvider({ children }) {
     const value = {
         user,
         setUser,
-        loading
+        loading,
+        loadUser
     };
 
     return (
@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (context === undefined) {
+    if (!context) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;
