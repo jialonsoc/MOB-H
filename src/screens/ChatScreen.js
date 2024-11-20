@@ -96,6 +96,14 @@ export default function ChatScreen() {
         }
     };
 
+    if (!user) {
+        return (
+            <View style={styles.container}>
+                <Text>Por favor inicia sesión para acceder al chat</Text>
+            </View>
+        );
+    }
+
     return (
         <KeyboardAvoidingView 
             style={[styles.container, { 

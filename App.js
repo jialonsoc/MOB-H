@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TabNavigator from './src/navigation/TabNavigator';
 import LandingScreen from './src/screens/LandingScreen';
 import { ThemeProvider } from './src/context/ThemeContext';
+import { AuthProvider } from './src/context/AuthContext';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -44,17 +45,19 @@ export default function App() {
     }
 
     return (
-        <ThemeProvider>
-            <NavigationContainer onReady={onLayoutRootView}>
-                <StatusBar style="auto" />
-                <Stack.Navigator 
-                    initialRouteName="Landing"
-                    screenOptions={{ headerShown: false }}
-                >
-                    <Stack.Screen name="Landing" component={LandingScreen} />
-                    <Stack.Screen name="MainTabs" component={TabNavigator} />
-                </Stack.Navigator>
-            </NavigationContainer>
-        </ThemeProvider>
+        <AuthProvider>
+            <ThemeProvider>
+                <NavigationContainer onReady={onLayoutRootView}>
+                    <StatusBar style="auto" />
+                    <Stack.Navigator 
+                        initialRouteName="Landing"
+                        screenOptions={{ headerShown: false }}
+                    >
+                        <Stack.Screen name="Landing" component={LandingScreen} />
+                        <Stack.Screen name="MainTabs" component={TabNavigator} />
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </ThemeProvider>
+        </AuthProvider>
     );
 }
