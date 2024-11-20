@@ -15,11 +15,17 @@ import * as KeepAwake from 'expo-keep-awake';
 
 const Stack = createNativeStackNavigator();
 
-await SplashScreen.preventAutoHideAsync();
-
-if (__DEV__) {
-    await KeepAwake.activateKeepAwakeAsync();
-}
+// Inicialización asíncrona usando IIFE
+(async () => {
+    try {
+        await SplashScreen.preventAutoHideAsync();
+        if (__DEV__) {
+            await KeepAwake.activateKeepAwakeAsync();
+        }
+    } catch (e) {
+        console.warn('Error durante la inicialización:', e);
+    }
+})();
 
 export default function App() {
     const [fontsLoaded] = useFonts({
