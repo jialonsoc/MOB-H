@@ -24,15 +24,54 @@ export function AuthProvider({ children }) {
         }
     };
 
-    const value = {
-        user,
-        setUser,
-        loading,
-        loadUser
+    const register = async (userData) => {
+        try {
+            // Aquí iría la llamada al backend
+            await AsyncStorage.setItem('user', JSON.stringify(userData));
+            setUser(userData);
+            return true;
+        } catch (error) {
+            console.error('Error en registro:', error);
+            return false;
+        }
+    };
+
+    const login = async (email, password) => {
+        try {
+            // Aquí iría la llamada al backend
+            const savedUser = await AsyncStorage.getItem('user');
+            if (savedUser) {
+                const userData = JSON.parse(savedUser);
+                if (userData.email === email) {
+                    setUser(userData);
+                    return true;
+                }
+            }
+            return false;
+        } catch (error) {
+            console.error('Error en login:', error);
+            return false;
+        }
+    };
+
+    const logout = async () => {
+        try {
+            await AsyncStorage.removeItem('user');
+            setUser(null);
+        } catch (error) {
+            console.error('Error en logout:', error);
+        }
     };
 
     return (
-        <AuthContext.Provider value={value}>
+        <AuthContext.Provider value={{
+            user,
+            setUser,
+            loading,
+            register,
+            login,
+            logout
+        }}>
             {children}
         </AuthContext.Provider>
     );

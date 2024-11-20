@@ -53,6 +53,8 @@ export default function App() {
                         initialRouteName="Landing"
                         screenOptions={{ headerShown: false }}
                     >
+                        <Stack.Screen name="Login" component={LoginScreen} />
+                        <Stack.Screen name="Register" component={RegisterScreen} />
                         <Stack.Screen name="Landing" component={LandingScreen} />
                         <Stack.Screen name="MainTabs" component={TabNavigator} />
                     </Stack.Navigator>

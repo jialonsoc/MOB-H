@@ -1,108 +1,54 @@
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function LandingScreen({ navigation }) {
-  const { isDarkMode } = useThemeContext();
+    const { isDarkMode } = useThemeContext();
 
-  return (
-    <SafeAreaView style={[
-      styles.container,
-      { backgroundColor: isDarkMode ? '#000' : '#fff' }
-    ]}>
-      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
-      
-      <View style={styles.content}>
-        <Text style={[
-          styles.title,
-          { color: isDarkMode ? '#fff' : '#000' }
+    return (
+        <SafeAreaView style={[
+            styles.container,
+            { backgroundColor: isDarkMode ? '#000' : '#fff' }
         ]}>
-          Bienvenido a HabitsPage
-        </Text>
-        
-        <Text style={[
-          styles.subtitle,
-          { color: isDarkMode ? '#ccc' : '#666' }
-        ]}>
-          Construye hábitos positivos, un día a la vez
-        </Text>
+            <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+            
+            <View style={styles.content}>
+                <Text style={[
+                    styles.title,
+                    { color: isDarkMode ? '#fff' : '#000' }
+                ]}>
+                    Bienvenido a HabitsPage
+                </Text>
 
-        <View style={styles.imageContainer}>
-          <Ionicons 
-            name="leaf-outline" 
-            size={120} 
-            color={isDarkMode ? '#fff' : '#000'}
-            style={styles.icon}
-          />
-        </View>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity 
+                        style={[styles.button, styles.loginButton]}
+                        onPress={() => navigation.navigate('Login')}
+                    >
+                        <Text style={styles.buttonText}>Iniciar Sesión</Text>
+                    </TouchableOpacity>
 
-        <View style={styles.featuresContainer}>
-          <View style={[
-            styles.featureCard,
-            { backgroundColor: isDarkMode ? '#1c1c1e' : '#f5f5f5' }
-          ]}>
-            <Text style={[
-              styles.featureTitle,
-              { color: isDarkMode ? '#fff' : '#000' }
-            ]}>
-              Seguimiento Diario
-            </Text>
-            <Text style={[
-              styles.featureText,
-              { color: isDarkMode ? '#ccc' : '#666' }
-            ]}>
-              Registra y monitorea tus hábitos diariamente
-            </Text>
-          </View>
+                    <TouchableOpacity 
+                        style={[styles.button, styles.registerButton]}
+                        onPress={() => navigation.navigate('Register')}
+                    >
+                        <Text style={styles.buttonText}>Registrarse</Text>
+                    </TouchableOpacity>
 
-          <View style={[
-            styles.featureCard,
-            { backgroundColor: isDarkMode ? '#1c1c1e' : '#f5f5f5' }
-          ]}>
-            <Text style={[
-              styles.featureTitle,
-              { color: isDarkMode ? '#fff' : '#000' }
-            ]}>
-              Estadísticas Detalladas
-            </Text>
-            <Text style={[
-              styles.featureText,
-              { color: isDarkMode ? '#ccc' : '#666' }
-            ]}>
-              Visualiza tu progreso con gráficos intuitivos
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.button, styles.loginButton]}
-            onPress={() => navigation.navigate('Login')}
-          >
-            <Text style={styles.buttonText}>Iniciar Sesión</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.button, styles.registerButton]}
-            onPress={() => navigation.navigate('Register')}
-          >
-            <Text style={styles.buttonText}>Registrarse</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.button, styles.guestButton]}
-            onPress={() => navigation.navigate('MainTabs')}
-          >
-            <Text style={[styles.buttonText, styles.guestButtonText]}>
-              Continuar como invitado
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </SafeAreaView>
-  );
+                    <TouchableOpacity 
+                        style={[styles.button, styles.guestButton]}
+                        onPress={() => navigation.navigate('MainTabs')}
+                    >
+                        <Text style={[styles.buttonText, styles.guestButtonText]}>
+                            Continuar como invitado
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
