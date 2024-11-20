@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TabNavigator from './src/navigation/TabNavigator';
 import LandingScreen from './src/screens/LandingScreen';
+import LoginScreen from './src/screens/LoginScreen';
+import RegisterScreen from './src/screens/RegisterScreen';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { AuthProvider } from './src/context/AuthContext';
 import { useFonts } from 'expo-font';
@@ -12,21 +14,10 @@ import {
     Inter_400Regular,
     Inter_700Bold 
 } from '@expo-google-fonts/inter';
-import * as KeepAwake from 'expo-keep-awake';
 
 const Stack = createNativeStackNavigator();
 
-// Inicialización asíncrona usando IIFE
-(async () => {
-    try {
-        await SplashScreen.preventAutoHideAsync();
-        if (__DEV__) {
-            await KeepAwake.activateKeepAwakeAsync();
-        }
-    } catch (e) {
-        console.warn('Error durante la inicialización:', e);
-    }
-})();
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
     const [fontsLoaded] = useFonts({
@@ -53,9 +44,9 @@ export default function App() {
                         initialRouteName="Landing"
                         screenOptions={{ headerShown: false }}
                     >
+                        <Stack.Screen name="Landing" component={LandingScreen} />
                         <Stack.Screen name="Login" component={LoginScreen} />
                         <Stack.Screen name="Register" component={RegisterScreen} />
-                        <Stack.Screen name="Landing" component={LandingScreen} />
                         <Stack.Screen name="MainTabs" component={TabNavigator} />
                     </Stack.Navigator>
                 </NavigationContainer>
