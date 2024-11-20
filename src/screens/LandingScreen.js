@@ -76,14 +76,30 @@ export default function LandingScreen({ navigation }) {
           </View>
         </View>
 
-        <TouchableOpacity 
-          style={styles.button}
-          onPress={() => navigation.navigate('MainTabs')}
-        >
-          <Text style={styles.buttonText}>
-            Comenzar
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={[styles.button, styles.loginButton]}
+            onPress={() => navigation.navigate('Login')}
+          >
+            <Text style={styles.buttonText}>Iniciar Sesión</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.button, styles.registerButton]}
+            onPress={() => navigation.navigate('Register')}
+          >
+            <Text style={styles.buttonText}>Registrarse</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.button, styles.guestButton]}
+            onPress={() => navigation.navigate('MainTabs')}
+          >
+            <Text style={[styles.buttonText, styles.guestButtonText]}>
+              Continuar como invitado
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -137,16 +153,36 @@ const styles = StyleSheet.create({
   featureText: {
     fontSize: 16,
   },
+  buttonContainer: {
+    width: '100%',
+    paddingHorizontal: 20,
+    marginTop: 30,
+  },
   button: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 40,
-    paddingVertical: 15,
+    width: '100%',
+    height: 50,
     borderRadius: 25,
-    marginTop: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  loginButton: {
+    backgroundColor: '#007AFF',
+  },
+  registerButton: {
+    backgroundColor: '#34C759',
+  },
+  guestButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#007AFF',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
+  },
+  guestButtonText: {
+    color: '#007AFF',
   },
 });
