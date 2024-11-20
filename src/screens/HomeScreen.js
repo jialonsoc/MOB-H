@@ -8,7 +8,8 @@ import {
     Alert,
     Keyboard,
     ScrollView,
-    RefreshControl
+    RefreshControl,
+    Text
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
