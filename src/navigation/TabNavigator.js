@@ -4,13 +4,12 @@ import HomeScreen from '../screens/HomeScreen';
 import StatsScreen from '../screens/StatsScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import { useThemeContext } from '../context/ThemeContext';
+import ExpensesScreen from '../screens/ExpensesScreen';
+import TripsScreen from '../screens/TripsScreen';
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
-    const { isDarkMode } = useThemeContext();
-
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -21,6 +20,10 @@ export default function TabNavigator() {
                         iconName = focused ? 'home' : 'home-outline';
                     } else if (route.name === 'Stats') {
                         iconName = focused ? 'stats-chart' : 'stats-chart-outline';
+                    } else if (route.name === 'Trips') {
+                        iconName = focused ? 'airplane' : 'airplane-outline';
+                    } else if (route.name === 'Expenses') {
+                        iconName = focused ? 'wallet' : 'wallet-outline';
                     } else if (route.name === 'Chat') {
                         iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
                     } else if (route.name === 'Profile') {
@@ -29,22 +32,14 @@ export default function TabNavigator() {
 
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: '#007AFF',
-                tabBarInactiveTintColor: 'gray',
-                tabBarStyle: {
-                    backgroundColor: isDarkMode ? '#000' : '#fff',
-                    borderTopColor: isDarkMode ? '#333' : '#e5e5e5',
-                },
-                headerStyle: {
-                    backgroundColor: isDarkMode ? '#000' : '#fff',
-                },
-                headerTintColor: isDarkMode ? '#fff' : '#000',
             })}
         >
-            <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Inicio' }} />
-            <Tab.Screen name="Stats" component={StatsScreen} options={{ title: 'Estadísticas' }} />
-            <Tab.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
-            <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
+            <Tab.Screen name="Home" component={HomeScreen} />
+            <Tab.Screen name="Stats" component={StatsScreen} />
+            <Tab.Screen name="Trips" component={TripsScreen} />
+            <Tab.Screen name="Expenses" component={ExpensesScreen} />
+            <Tab.Screen name="Chat" component={ChatScreen} />
+            <Tab.Screen name="Profile" component={ProfileScreen} />
         </Tab.Navigator>
     );
 }
