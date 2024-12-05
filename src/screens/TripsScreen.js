@@ -4,25 +4,23 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
+    Platform,
     FlatList,
-    Share,
-    Alert,
-    Platform
+    ActivityIndicator,
+    Alert
 } from 'react-native';
-import { useThemeContext } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import TripCard from '../components/TripCard';
+import { useThemeContext } from '../context/ThemeContext';
+import { storage } from '../utils/storage';
 import CreateTripModal from '../components/CreateTripModal';
-import JoinTripModal from '../components/JoinTripModal';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TripsScreen({ navigation }) {
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [trips, setTrips] = useState([]);
+    const [loading, setLoading] = useState(true);
     const { isDarkMode } = useThemeContext();
     const { user } = useAuth();
-    const [trips, setTrips] = useState([]);
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [showJoinModal, setShowJoinModal] = useState(false);
 
     useEffect(() => {
         loadTrips();
@@ -30,17 +28,23 @@ export default function TripsScreen({ navigation }) {
 
     const loadTrips = async () => {
         try {
-            const savedTrips = await AsyncStorage.getItem('trips');
-            if (savedTrips) {
-                setTrips(JSON.parse(savedTrips));
-            }
+            setLoading(true);
+            const savedTrips = await storage.load('trips') || [];
+            setTrips(savedTrips);
         } catch (error) {
-            console.error('Error loading trips:', error);
+            console.error('Error al cargar viajes:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleCreateTrip = async (newTrip) => {
         try {
+            if (!user) {
+                Alert.alert('Error', 'Debes iniciar sesión para crear un viaje');
+                return;
+            }
+
             const tripWithId = {
                 ...newTrip,
                 id: Date.now().toString(),
@@ -49,124 +53,71 @@ export default function TripsScreen({ navigation }) {
                 code: Math.random().toString(36).substring(2, 8).toUpperCase()
             };
 
-            const updatedTrips = [...trips, tripWithId];
-            await AsyncStorage.setItem('trips', JSON.stringify(updatedTrips));
+            const updatedTrips = await storage.saveTrip(tripWithId);
             setTrips(updatedTrips);
             setShowCreateModal(false);
         } catch (error) {
             console.error('Error al crear el viaje:', error);
-            if (Platform.OS === 'web') {
-                window.alert('Error al crear el viaje');
-            } else {
-                Alert.alert('Error', 'No se pudo crear el viaje');
-            }
+            Alert.alert('Error', 'No se pudo crear el viaje');
         }
     };
 
-    const handleJoinTrip = async (code) => {
-        try {
-            const tripToJoin = trips.find(trip => trip.code === code);
-            if (!tripToJoin) {
-                Alert.alert('Error', 'Código de viaje no válido');
-                return;
-            }
-
-            if (tripToJoin.participants.some(p => p.id === user.id)) {
-                Alert.alert('Error', 'Ya eres participante de este viaje');
-                return;
-            }
-
-            const updatedTrips = trips.map(trip => {
-                if (trip.id === tripToJoin.id) {
-                    return {
-                        ...trip,
-                        participants: [...trip.participants, { id: user.id, name: user.name }]
-                    };
-                }
-                return trip;
-            });
-
-            await AsyncStorage.setItem('trips', JSON.stringify(updatedTrips));
-            setTrips(updatedTrips);
-            setShowJoinModal(false);
-        } catch (error) {
-            Alert.alert('Error', 'No se pudo unir al viaje');
-        }
-    };
-
-    const shareTrip = async (trip) => {
-        try {
-            await Share.share({
-                message: `¡Únete a mi viaje "${trip.name}" en HabitsPage! Usa el código: ${trip.code}`,
-            });
-        } catch (error) {
-            Alert.alert('Error', 'No se pudo compartir el viaje');
-        }
-    };
-
-    const renderTrip = ({ item }) => (
-        <TripCard
-            trip={item}
-            onPress={() => navigation.navigate('TripDetails', { tripId: item.id })}
-            onShare={() => shareTrip(item)}
-            isDarkMode={isDarkMode}
-        />
+    const renderTripItem = ({ item }) => (
+        <TouchableOpacity
+            style={[
+                styles.tripCard,
+                { backgroundColor: isDarkMode ? '#333' : '#f5f5f5' }
+            ]}
+            onPress={() => navigation.navigate('TripDetails', { trip: item })}
+        >
+            <Text style={[
+                styles.tripName,
+                { color: isDarkMode ? '#fff' : '#000' }
+            ]}>
+                {item.name}
+            </Text>
+            <Text style={[
+                styles.tripDate,
+                { color: isDarkMode ? '#ccc' : '#666' }
+            ]}>
+                {new Date(item.startDate).toLocaleDateString()} - 
+                {new Date(item.endDate).toLocaleDateString()}
+            </Text>
+        </TouchableOpacity>
     );
+
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#007AFF" />
+            </View>
+        );
+    }
 
     return (
         <View style={[
             styles.container,
-            { backgroundColor: isDarkMode ? '#000' : '#fff' }
+            { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' }
         ]}>
-            <View style={styles.header}>
-                <Text style={[
-                    styles.title,
-                    { color: isDarkMode ? '#fff' : '#000' }
-                ]}>
-                    Mis Viajes
-                </Text>
-                <View style={styles.headerButtons}>
-                    <TouchableOpacity
-                        style={styles.headerButton}
-                        onPress={() => setShowJoinModal(true)}
-                    >
-                        <Ionicons name="enter-outline" size={24} color="#007AFF" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.headerButton}
-                        onPress={() => setShowCreateModal(true)}
-                    >
-                        <Ionicons name="add-circle-outline" size={24} color="#007AFF" />
-                    </TouchableOpacity>
-                </View>
-            </View>
-
             <FlatList
                 data={trips}
-                renderItem={renderTrip}
+                renderItem={renderTripItem}
                 keyExtractor={item => item.id}
-                contentContainerStyle={styles.tripsList}
-                ListEmptyComponent={
-                    <Text style={[
-                        styles.emptyText,
-                        { color: isDarkMode ? '#fff' : '#000' }
-                    ]}>
-                        No tienes viajes activos
-                    </Text>
-                }
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
             />
+
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={() => setShowCreateModal(true)}
+            >
+                <Ionicons name="add" size={24} color="#fff" />
+            </TouchableOpacity>
 
             <CreateTripModal
                 visible={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
                 onSubmit={handleCreateTrip}
-                isDarkMode={isDarkMode}
-            />
-
-            <JoinTripModal
-                visible={showJoinModal}
-                onClose={() => setShowJoinModal(false)}
-                onSubmit={handleJoinTrip}
                 isDarkMode={isDarkMode}
             />
         </View>
@@ -176,33 +127,50 @@ export default function TripsScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
     },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 20,
     },
-    title: {
-        fontSize: 24,
+    listContent: {
+        padding: 16,
+        paddingBottom: 80, // Espacio para el FAB
+    },
+    tripCard: {
+        padding: 16,
+        borderRadius: 10,
+        marginBottom: 16,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    tripName: {
+        fontSize: 18,
         fontWeight: 'bold',
+        marginBottom: 8,
         fontFamily: 'Inter-Bold',
     },
-    headerButtons: {
-        flexDirection: 'row',
-    },
-    headerButton: {
-        marginLeft: 15,
-        padding: 5,
-    },
-    tripsList: {
-        flexGrow: 1,
-    },
-    emptyText: {
-        textAlign: 'center',
-        fontSize: 16,
+    tripDate: {
+        fontSize: 14,
         fontFamily: 'Inter-Regular',
-        marginTop: 20,
+    },
+    fab: {
+        position: 'absolute',
+        right: 16,
+        bottom: 16,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: '#007AFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
     },
 });

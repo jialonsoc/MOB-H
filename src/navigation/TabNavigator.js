@@ -1,4 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import StatsScreen from '../screens/StatsScreen';
@@ -6,8 +7,27 @@ import ChatScreen from '../screens/ChatScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ExpensesScreen from '../screens/ExpensesScreen';
 import TripsScreen from '../screens/TripsScreen';
+import TripDetailsScreen from '../screens/TripDetailsScreen';
 
 const Tab = createBottomTabNavigator();
+const TripsStack = createNativeStackNavigator();
+
+function TripsStackNavigator() {
+    return (
+        <TripsStack.Navigator>
+            <TripsStack.Screen 
+                name="TripsMain" 
+                component={TripsScreen}
+                options={{ headerShown: false }}
+            />
+            <TripsStack.Screen 
+                name="TripDetails" 
+                component={TripDetailsScreen}
+                options={{ title: 'Detalles del Viaje' }}
+            />
+        </TripsStack.Navigator>
+    );
+}
 
 export default function TabNavigator() {
     return (
@@ -36,7 +56,7 @@ export default function TabNavigator() {
         >
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Stats" component={StatsScreen} />
-            <Tab.Screen name="Trips" component={TripsScreen} />
+            <Tab.Screen name="Trips" component={TripsStackNavigator} />
             <Tab.Screen name="Expenses" component={ExpensesScreen} />
             <Tab.Screen name="Chat" component={ChatScreen} />
             <Tab.Screen name="Profile" component={ProfileScreen} />

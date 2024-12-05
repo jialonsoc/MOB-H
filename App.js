@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TabNavigator from './src/navigation/TabNavigator';
@@ -14,6 +14,7 @@ import {
     Inter_400Regular,
     Inter_700Bold 
 } from '@expo-google-fonts/inter';
+import { loadSeeds } from './src/utils/seeds';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +31,12 @@ export default function App() {
             await SplashScreen.hideAsync();
         }
     }, [fontsLoaded]);
+
+    useEffect(() => {
+        if (__DEV__) { // Solo en desarrollo
+            loadSeeds();
+        }
+    }, []);
 
     if (!fontsLoaded) {
         return null;

@@ -18,7 +18,7 @@ import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
 import AddHabitInput from '../components/AddHabitInput';
 import { useThemeContext } from '../context/ThemeContext';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen() {
     const { isDarkMode } = useThemeContext();
